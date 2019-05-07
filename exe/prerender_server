@@ -1,0 +1,32 @@
+#!/usr/bin/env ruby
+
+require 'optparse'
+
+options = {}
+OptionParser.new do |opts|
+  opts.banner = 'Usage: prerender_server [options]'
+
+  opts.on('--port=PORT') do |port|
+    options[:port] = port
+  end
+
+  opts.on('--wait_after_last_request=Time') do |time|
+    options[:wait_after_last_request] = time
+  end
+
+  opts.on('--whitelist=LIST') do |list|
+    options[:whitelist] = list
+  end
+
+  opts.on('--action=ACTION') do |action|
+    options[:action] = action
+  end
+end.parse!
+
+gem_path = File.expand_path('..', __dir__)
+
+Dir.chdir(gem_path) do
+  system('yarn install')
+
+  system("PORT=#{options[:port]} WAIT_AFTER_LAST_REQUEST=#{options[:wait_after_last_request]} ALLOWED_DOMAINS=#{options[:whitelist]} yarn exec forever #{options[:action]} server.js")
+end
